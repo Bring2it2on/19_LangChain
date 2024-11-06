@@ -67,3 +67,19 @@ async def chat(request: ChatRequest):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
     
+# 채팅 히스토리 조회
+@app.get("/chat_history/{user_id}/{conversation_id}")
+async def get_history(user_id: str, conversation_id:str):
+    try:
+        history = SQLChatMessageHistory(
+            table_name=user_id,
+            session_id=conversation_id,
+            connection="sqlite:///sqlite.db"
+        )
+
+        return {"message": [
+            {"role": "user" if msg.type == "human" else "assistance", "content": msg.content}
+            for msg in history.messages
+        ]}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
